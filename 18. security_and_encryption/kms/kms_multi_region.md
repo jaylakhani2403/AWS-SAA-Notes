@@ -36,7 +36,7 @@ Here’s a **deeply structured, concise-yet-complete rewrite** of your notes on 
 
 | Step | Action                                                                           |
 | ---- | -------------------------------------------------------------------------------- |
-| 1️⃣  | App in `us-east-1` encrypts SSN using **primary MRK**                            |
+| 1️⃣  | App in `us-east-1` encrypts SSN (secure attribute of entry) using **primary MRK**                            |
 | 2️⃣  | Encrypted SSN written to **DynamoDB Global Table**                               |
 | 3️⃣  | Table replicates to `ap-southeast-2`                                             |
 | 4️⃣  | App in `ap-southeast-2` decrypts SSN using **replica MRK** locally (low latency) |

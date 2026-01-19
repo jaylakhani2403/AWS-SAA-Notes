@@ -8,6 +8,7 @@ Here’s a **short and clear summary** of **Amazon Managed Service for Apache Fl
 
 * **Fully managed** service to run **Apache Flink apps** on AWS
 * Flink processes **real-time data streams** using **Java, SQL, or Scala**
+* AMS Flink consumes from: Kinesis Data Streams, Kafka, MSK and fanouts data to various sinks including Kinesis Data Streams, Kinesis Data Firehose, S3, DynamoDB, OpenSearch, Lambda, HTTP endpoints, and custom destinations.
 
 ---
 

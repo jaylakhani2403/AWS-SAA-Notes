@@ -41,15 +41,17 @@ Here are **in-depth notes on Amazon DynamoDB**, covering **all core concepts**, 
 
 ### 🔑 Primary Keys (VERY IMPORTANT)
 
+* All items must have a **unique Primary Key (Partition Key + Sort Key(Optional))**.
+
 #### ➤ **Partition Key (PK)** (a.k.a. Hash Key)
 
 * Uniquely identifies an item.
 * DynamoDB uses it to **determine the partition** (internal storage location).
-* All items must have a **unique PK**.
+* All items must have a **unique Partition Key** as there is no Sort key.
 
 #### ➤ **Partition Key + Sort Key** (a.k.a. Composite Key)
 
-* Enables **storing multiple related items** with the same PK.
+* Enables **storing multiple related items** with the same PK (with unique Sort keys per PK).
 * Sort Key allows **querying based on range/sorting**, e.g., timestamps.
 
 🧠 *Use Cases:*
@@ -132,21 +134,64 @@ eg. 400kb item needs 400 wcu to write.
 
 ---
 
-### 🧰 Indexes
+## **Indexes**
 
-#### 1. **Local Secondary Index (LSI)**
+### **1. Local Secondary Index (LSI)**
 
-* Same PK, different SK
-* Up to **5 LSIs per table**
-* Created only at table creation
-* Strongly consistent reads allowed
+### **Core Concept**
+Think of LSI as creating **multiple sorted views** of the same data within each partition.
 
-#### 2. **Global Secondary Index (GSI)**
+### **How It Works Under the Hood**
+```javascript
+// Base Table: User orders sorted by date
+Partition [User#123]:
+PK=User#123, SK=2024-01-01, Amount=100
+PK=User#123, SK=2024-01-02, Amount=250
+PK=User#123, SK=2024-01-03, Amount=150
 
-* Different PK and SK
-* Up to **20 GSIs per table**
-* Can be created **anytime**
-* Only eventually consistent reads
+// LSI-Amount: Same data, sorted differently
+PK=User#123, LSI-SK=100  → points to SK=2024-01-01
+PK=User#123, LSI-SK=150  → points to SK=2024-01-03  
+PK=User#123, LSI-SK=250  → points to SK=2024-01-02
+```
+
+### **Storage Architecture**
+- **Collocated**: LSI entries live **within the same physical partition** as base data
+- **References**: Contains pointers to base items, not full copies (unless projecting ALL)
+- **Synchronous Updates**: Write to base table and LSI happens atomically
+
+---
+
+### **2. Global Secondary Index (GSI)**
+
+### **Core Concept**
+GSI is essentially **a completely separate table** that DynamoDB maintains automatically, with its own partition structure.
+
+### **How It Works Under the Hood**
+```javascript
+// Base Table: User-centric view
+[Partition A] PK=User#123, SK=ORDER#001, Status=SHIPPED
+[Partition B] PK=User#456, SK=ORDER#002, Status=PENDING
+
+// GSI-Status: Status-centric view (separate physical table)
+[Partition X] PK=SHIPPED, GSI-SK=ORDER#001, user_id=123
+[Partition Y] PK=PENDING, GSI-SK=ORDER#002, user_id=456
+```
+
+### **Storage Architecture**
+- **Separate Partitions**: GSI lives in **completely different physical storage**
+- **Asynchronous Replication**: Changes propagate async (typically < 1s)
+- **Independent Scaling**: Can provision different throughput than base table
+
+---
+
+### **Key Distinctions in Practice**
+
+#### **When to Use Which:**
+- **LSI**: "Show me this user's data in different sort orders"
+- **GSI**: "Show me all data across users filtered/sorted differently"
+
+---
 
 🧠 *Index Caveats:*
 
@@ -163,27 +208,63 @@ eg. 400kb item needs 400 wcu to write.
 
 ---
 
-### 🔄 Streams & Triggers
+## **DynamoDB Stream Processing**
 
-#### ✅ **DynamoDB Streams**
+create, update, delete stream. can be used directly or via kinesis data streams (routed to).
 
-* Logs **change data capture** (CDC) – insert, update, delete
-* Stream events stored for **24 hours**
-* Can trigger **Lambda functions**
+### **Two Options**
 
-🧠 *Use Cases:*
+#### **DynamoDB Streams**
+- 24-hour retention
+- Limited consumers (2-3)
+- Native Lambda triggers
+- **Best for**: Simple event reactions
 
-* Replication
-* Auditing
-* Event-driven architecture
+#### **Kinesis Data Streams**
+- Up to 1-year retention
+- Unlimited consumers
+- Full Kinesis ecosystem
+- **Best for**: Complex pipelines
+
+### **How It Works**
+```
+DynamoDB Table → Stream → Process → Destinations
+   (CUD ops)     ↓
+           Real-time processing
+```
+
+### **Architecture Paths**
+
+#### **DynamoDB Streams:**
+- → Lambda (automatic)
+- → EC2/KCL (custom)
+
+**Use**: Welcome emails, replication, simple transforms
+
+#### **Kinesis Data Streams:**
+- → Kinesis Analytics/Firehose
+- → S3/Redshift/OpenSearch
+- → Multiple Lambdas/EC2
+
+**Use**: Analytics pipelines, data lakes, multi-consumer systems
+
+### **Quick Comparison**
+- **Retention**: 24h vs 1 year
+- **Scalability**: Limited vs Unlimited consumers
+- **Integration**: Lambda-native vs Manual setup
+- **Complexity**: Simple vs Enterprise pipelines
+
+**Choose DynamoDB Streams** for Lambda-driven workflows.  
+**Choose Kinesis** for complex, multi-destination processing.
 
 ---
 
 ### ☁️ Global Tables (Multi-Region)
 
-* **Active-active replication** across AWS regions
+* **Active-active replication** across AWS regions (two way replication)
+* Enable DynamoDB Streams first.
 * Built on **Streams + Replication**
-* Supports **multi-region writes**
+* Supports **multi-region writes and reads**
 * Conflict resolution: **Last writer wins**
 
 🧠 *Use Case:* Low-latency multi-region apps with automatic replication.
@@ -227,6 +308,53 @@ SELECT * FROM Users WHERE userId = '123';
 
 * Makes migration/testing easier
 * Internally uses same API as normal operations
+
+---
+
+## **DynamoDB Accelerator (DAX)**
+
+### **What is DAX?**
+- **In-memory cache** for DynamoDB - reduces read load by **10x**
+- **Microsecond latency** for cached reads (vs DynamoDB's millisecond)
+- **Fully managed** - no application changes needed
+
+### **Key Features**
+```python
+# Same API as DynamoDB - just change endpoint
+dax_client = AmazonDaxClient(endpoint='dax-cluster.amazonaws.com')
+
+# Automatic cache warming
+# Reads populate cache automatically
+
+# Write-through cache
+# Writes go to both DAX and DynamoDB
+```
+
+### **When to Use DAX**
+✅ **Read-heavy workloads** (e.g., user profiles, product catalogs)  
+✅ **Repeat queries** with same parameters  
+✅ **Microsecond latency** requirements  
+✅ **Reduce DynamoDB read costs** (cache hits don't consume RCU)
+
+### **Limitations**
+❌ **Cache size limited** by node type (up to 237GB per cluster)  
+❌ **Not for write-heavy** workloads  
+❌ **Default TTL**: 5 minutes (configurable)  
+❌ **Additional cost** on top of DynamoDB
+
+### **DAX vs ElastiCache**
+- **DAX**: Optimized for DynamoDB objects/queries
+- **ElastiCache**: General-purpose cache (Redis/Memcached)
+- **Use both**: DAX for single objects + ElastiCache for computed aggregations
+
+### **Architecture**
+```
+App → DAX Cluster → DynamoDB
+      ↓ Cache Hit   ↓ Cache Miss
+    μs latency     ms latency
+```
+
+**TLDR**: DAX = In-memory read cache for DynamoDB, 10x faster reads, no code changes.
 
 ---
 
@@ -276,6 +404,7 @@ Query where PK = 'chat#123' ORDER BY SK
 | On-Demand Mode   | Auto scale, easy but costly        |
 | Provisioned Mode | Manual scale, cost effective       |
 | Global Tables    | Multi-region active-active sync    |
+
 
 ---
 

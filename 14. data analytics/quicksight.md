@@ -22,7 +22,7 @@ It supports **interactive dashboards**, **ML-powered insights**, and **embedding
 | Feature                       | Benefit                                                            |
 | ----------------------------- | ------------------------------------------------------------------ |
 | ✅ **Serverless**              | No infrastructure to manage (auto-scales to 1000s of users)        |
-| ⚡ **SPICE engine**            | provides fast, in-memory querying for big data                              |
+| ⚡ **SPICE engine**            | provides fast, in-memory querying for big data (only for data imported in quicksight)                              |
 | 🔗 **Native AWS integration** | Seamless access to S3, Athena, RDS, Redshift, Glue, etc.           |
 | 💸 **Pay-per-session**        | Cost-efficient for large reader audiences                          |
 | 🧠 **ML Insights**            | Built-in anomaly detection, forecasting, and natural language Q\&A |

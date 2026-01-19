@@ -110,9 +110,16 @@ Formerly called **Kibana**.
 ## 🧱 8. Architecture of OpenSearch
 
 ```
-[Client] → [OpenSearch Endpoint] → [Coordinator Node]
-                            ↙        ↓        ↘
-                       [Shard 1]  [Shard 2]  [Replica]
+[Client]    →  [OpenSearch Endpoint]  →   [Coordinator Node*]
+                                                  ↓
+                                            [Data Nodes Cluster]
+
+                                    ↙           ↓            ↓            ↘
+                                    
+                        [Node A]           [Node B]         [Node C]          [Node D]
+                          ↙ ↘               ↙ ↘              ↙ ↘              ↙ ↘
+                    [Shard] [Replica] [Shard] [Replica] [Shard] [Replica] [Shard] [Replica]
+
 ```
 
 * **Coordinator Node**: Handles client queries

@@ -39,7 +39,7 @@ On response:
 | Allow Rules     | ✅ Only allow           | ✅ Allow & ❌ Deny                   |
 | Return Traffic  | Auto-allowed           | Must be explicitly allowed         |
 | Rule Evaluation | All rules applied      | First match wins (lowest number)   |
-| Default         | Deny unless allowed    | Default NACL allows all            |
+| Default         | Deny unless allowed    | Block NACL denies all          |
 | Use Case        | Instance-level control | Subnet-level filtering or blocking |
 
 ---

@@ -50,6 +50,18 @@ Used to avoid duplicating code across functions.
 
 ---
 
+## **Lambda SnapStart** - Performance optimization:
+
+- **10x faster cold starts** at no extra cost
+- **Pre-initializes** functions and captures snapshots of memory/disk state
+- **Skips initialization phase** during invocation → direct to invoke phase
+- **Triggered** when publishing new function versions
+- **Reduces latency** especially beneficial for Java workloads with heavy initialization
+
+*(Traditional flow: Initialize → Invoke → Shutdown. With SnapStart: Snapshot → Invoke → Shutdown)*
+
+---
+
 ## ⚙️ Lambda Triggers
 
 | Trigger Source                      | What it does                                                       |
@@ -175,7 +187,7 @@ Use **dead-letter queues** (DLQ) for catching failed events.
 
 ## 🧩 Lambda + VPC Integration
 
-By default, Lambda **does not run inside a VPC**. But if it needs to access:
+By default, Lambda **runs inside AWS owned VPC**. But if it needs to access:
 
 * RDS in private subnet
 * Internal APIs

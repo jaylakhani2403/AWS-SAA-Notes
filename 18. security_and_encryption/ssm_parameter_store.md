@@ -20,7 +20,7 @@ It can store:
 | Type         | Encrypted | Description                                       |
 | ------------ | --------- | ------------------------------------------------- |
 | Plain text   | ❌ No      | Visible in console/API unless restricted          |
-| SecureString | ✅ Yes     | Encrypted using **KMS** CMK (Customer Master Key) |
+| SecureString | ✅ Yes     | Encrypted using **KMS** |
 
 * **KMS key must be accessible** by the IAM role accessing the parameter.
 * You can **choose the KMS key** or let AWS use the default `aws/ssm`.
@@ -89,7 +89,8 @@ Also ensure the role has KMS `Decrypt` permission:
 Allows adding **automation behavior** to parameters:
 
 * **Expiration (TTL)**: Automatically delete parameter after specific time
-* **No-change alert**: Trigger EventBridge if a parameter hasn’t changed
+* **Expiration alert**: Trigger EventBridge before X days/hours of Expiration
+* **No-change alert**: Trigger EventBridge if a parameter hasn’t changed for X days/hours
 * Useful for secret rotation & compliance
 
 ---

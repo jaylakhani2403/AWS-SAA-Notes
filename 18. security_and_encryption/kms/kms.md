@@ -66,7 +66,7 @@ This allows you to encrypt any data (e.g., passwords, tokens) manually using you
 | **Customer-Managed** | You             | ✅ Full control   | 💲 \$1/month | Custom encryption needs, cross-account, fine-grained access |
 
 * 📥 You can **import your own key material** for CMKs
-* 📈 Additional charges apply: **\$0.03 per 10,000 KMS API calls**
+* 📈 Additional charges apply for CMKs: **\$0.03 per 10,000 KMS API calls**
 
 ---
 
@@ -78,7 +78,7 @@ This allows you to encrypt any data (e.g., passwords, tokens) manually using you
 | Customer-Managed Keys | ✅ Manual or Auto   | You can enable auto-rotation (1 year) |
 | Imported Keys         | ❌ Manual only      | You must rotate them yourself         |
 
----
+<!-- ---
 
 ## 🌍 Regional Scope
 
@@ -89,7 +89,7 @@ This allows you to encrypt any data (e.g., passwords, tokens) manually using you
   2. Copy it to Region B with a new Region B KMS key
   3. Create a volume from the re-encrypted snapshot
 
-> You **can’t use the same KMS key in multiple regions**.
+> You **can’t use the same KMS key in multiple regions**. -->
 
 ---
 

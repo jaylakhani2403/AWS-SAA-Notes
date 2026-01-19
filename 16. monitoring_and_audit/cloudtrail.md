@@ -42,7 +42,7 @@ CloudTrail Console           Store to S3 (for long-term)
 
 ### 1. 🧰 **Management Events**
 
-These track **control plane** operations: creating, modifying, deleting resources.
+These track **control plane** operations: reading, creating, modifying, deleting resources.
 
 * **Read Events**: `ListUsers`, `DescribeInstances`
   (No changes, just viewing resources)
@@ -61,7 +61,7 @@ These track **data plane** operations — interactions with the **content** insi
 * **S3**: `GetObject`, `PutObject`, `DeleteObject`
 * **Lambda**: `InvokeFunction`
 
-🧠 You must **explicitly enable** these (e.g., enable on a specific S3 bucket or Lambda function)
+🧠 You must **explicitly enable** these (e.g., for all or enable on a specific S3 bucket or Lambda function)
 
 ---
 
@@ -128,7 +128,7 @@ This gives:
 | Feature            | Description                                    |
 | ------------------ | ---------------------------------------------- |
 | Tracks API actions | CLI, Console, SDK, service calls               |
-| Event Types        | Management, Data, Lambda Invocations, Insights |
+| Event Types        | Management, Data, Insights |
 | Retention          | 90 days default, ∞ with S3                     |
 | Alerting           | Via CloudWatch Logs, EventBridge               |
 | Insights           | Detect unusual activity (optional & paid)      |

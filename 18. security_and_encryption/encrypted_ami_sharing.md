@@ -1,4 +1,4 @@
-Here’s the **Encrypted AMI Sharing Process** explained in a **clear, visual, real-world style** for deep understanding (and exam prep):
+<!-- Here’s the **Encrypted AMI Sharing Process** explained in a **clear, visual, real-world style** for deep understanding (and exam prep):
 
 ---
 
@@ -63,16 +63,15 @@ Update the **KMS key policy** in Account A to grant usage to Account B:
 
 ---
 
-### ✅ Step 3: IAM Role/User in Account B
+### ✅ Step 3: Account A's IAM Role assumed by Account B
 
-Make sure Account B has an **IAM role or user** with permissions like:
+Make sure Account B assumes the **IAM role** of Account A with permissions like:
 
 ```json
 {
   "Effect": "Allow",
   "Action": [
-    "ec2:RunInstances",
-    "ec2:DescribeImages",
+    "ec2:DescribeImages"
     "kms:Decrypt",
     "kms:ReEncrypt*",
     "kms:DescribeKey"
@@ -83,24 +82,7 @@ Make sure Account B has an **IAM role or user** with permissions like:
 
 > ✅ Needed to:
 
-* **Launch EC2** from the shared AMI
 * **Decrypt** volumes during boot time using KMS
-
----
-
-### ✅ Step 4: (Optional) Re-encrypt with Account B's Own KMS Key
-
-Once launched, Account B can create **a new AMI or snapshot** re-encrypted with **its own KMS key**:
-
-```bash
-aws ec2 create-image --instance-id i-abc123 --name "NewAMIWithOwnKey"
-```
-
-This is optional but:
-
-* ✅ Gives full key control
-* ✅ Better isolation
-* ✅ Required for AMI replication in some scenarios
 
 ---
 
@@ -110,19 +92,146 @@ This is optional but:
 | ---------------------------- | ----------- | ------------------------------- |
 | AMI Launch Permission        | Account A   | So Account B can see and launch |
 | KMS Key Access (Policy)      | Account A   | So B can decrypt the AMI        |
-| IAM Role/User with KMS perms | Account B   | So EC2 can be launched          |
+| IAM Role of Account A with KMS perms | Account B   | So EC2 can be launched          |
 | (Optional) Re-encryption     | Account B   | Full ownership of encryption    |
 
 ---
 
 ## 🧠 Final Tip for Exam
 
-> Sharing an **unencrypted AMI** only needs launch permissions.
+> Sharing an **unencrypted AMI** needs only AMI access.
 > But sharing an **encrypted AMI** **always** needs:
 
-* 🔓 Launch permission
-* 🔐 KMS key access
+* 🔓 AMI access
+* 🔐 KMS key access -->
+
+
+Perfect — here are **clean, redefined, exam-ready notes** with **zero ambiguity**.
+You can revise this in **2 minutes before AWS SAA** and you’ll be safe.
 
 ---
 
-Let me know if you want CLI-only or CloudFormation versions of this process.
+# 🔐 Encrypted AMI Cross-Account Sharing — **Redefined Notes**
+
+---
+
+## 🎯 Goal
+
+Launch an **encrypted AMI owned by Account A** from **Account B**.
+
+---
+
+## 🧠 Core Rule (MEMORIZE)
+
+> **Encrypted AMI cross-account access requires permission on BOTH sides:**
+>
+> 🔹 **Resource policies in Account A**
+> 🔹 **IAM policies in Account B**
+
+IAM alone is **never sufficient**.
+
+---
+
+## 🏗️ Responsibility Split (VERY IMPORTANT)
+
+### 🅰️ Account A — *Resource Owner*
+
+Controls **what can be shared**
+
+### 🅱️ Account B — *Resource Consumer*
+
+Controls **what actions can be performed**
+
+---
+
+## 🅰️ Account A — REQUIRED Resource Policies
+
+### 1️⃣ AMI Launch Permission (EC2 Resource Policy)
+
+Allows Account B to **see and launch the AMI**.
+
+* API: `ModifyImageAttribute`
+* Without this → AMI is **invisible**
+
+---
+
+### 2️⃣ KMS Key Policy (KMS Resource Policy)
+
+Allows Account B to **decrypt the encrypted EBS snapshot**.
+
+Minimum required actions:
+
+* `kms:Decrypt`
+* `kms:CreateGrant`
+* `kms:DescribeKey`
+
+Without this → AMI visible, **launch fails**
+
+---
+
+## 🅱️ Account B — REQUIRED IAM Policies
+
+### 3️⃣ EC2 Permissions (Identity Policy)
+
+Allows Account B to **launch EC2 instances**.
+
+Required actions:
+
+* `ec2:RunInstances`
+* `ec2:DescribeImages`
+* `ec2:CreateVolume`
+* `ec2:AttachVolume`
+
+---
+
+### 4️⃣ KMS Permissions (Identity Policy)
+
+Allows Account B to **use the shared KMS key**.
+
+Required actions:
+
+* `kms:Decrypt`
+* `kms:CreateGrant`
+
+⚠️ These permissions work **only if** Account A’s KMS key policy allows them.
+
+---
+
+## 🚫 NOT Required (EXAM TRAPS)
+
+| Item                              | Required?           |
+| --------------------------------- | ------------------- |
+| Cross-account IAM role assumption | ❌ No                |
+| IAM policy in Account A           | ❌ No                |
+| Manual KMS grants                 | ❌ No (auto-created) |
+| STS AssumeRole                    | ❌ No                |
+
+---
+
+## 🔄 Optional (Best Practice)
+
+### 🔁 Copy & Re-Encrypt AMI (Account B)
+
+* Account B copies the AMI
+* Re-encrypts using **its own KMS key**
+* Full encryption ownership
+* Common **best-practice exam answer**
+
+---
+
+## ❌ Common Failure Scenarios
+
+| Missing Piece         | Result          |
+| --------------------- | --------------- |
+| AMI launch permission | AMI not visible |
+| KMS key policy        | Launch fails    |
+| EC2 IAM permission    | Access denied   |
+| KMS IAM permission    | Access denied   |
+
+---
+
+## 🧠 One-Line Exam Answer
+
+> **Cross-account encrypted AMI access requires AMI launch permission and KMS key policy in the owner account, plus EC2 and KMS IAM permissions in the consumer account.**
+
+---
