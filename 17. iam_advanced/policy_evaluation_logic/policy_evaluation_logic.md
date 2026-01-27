@@ -75,38 +75,8 @@ Let's look at the **full permission evaluation path**.
 
 Here’s how AWS evaluates whether an IAM user/role can perform an action:
 
-```
-START
-  ↓
-❗ Check for explicit deny (anywhere)
-  → YES → 🚫 DENY
-  → NO  → continue
-  ↓
-🏛️ Service Control Policies (SCPs)
-  → Is action allowed by SCP?
-    → NO → 🚫 DENY (implicit deny)
-    → YES → continue
-  ↓
-📦 Resource-based policies (e.g., S3 bucket policy)
-  → Is action allowed?
-    → NO → 🚫 DENY (implicit)
-    → YES → continue
-  ↓
-👤 Identity-based policies (attached to user/role)
-  → Is action allowed?
-    → NO → 🚫 DENY (implicit)
-    → YES → continue
-  ↓
-📏 IAM Permission Boundaries
-  → Is action within boundary?
-    → NO → 🚫 DENY
-    → YES → continue
-  ↓
-🧾 Session Policies (from STS or AssumeRole)
-  → Is action allowed?
-    → NO → 🚫 DENY
-    → YES → ✅ ALLOW
-```
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/18c1e023-64e9-4df7-9e08-d8060f0f478e" />
+
 
 ---
 
