@@ -61,4 +61,10 @@ Now, EC2 in that subnet will have:
 * Internet access requires a **route in the Route Table**
 * Only **subnets with public IPs + route to IGW** are truly *public subnets*
 
+  ---
+
+  <img width="486" height="511" alt="image" src="https://github.com/user-attachments/assets/ceb9fb22-40e2-44d2-85a3-9621a4ee53e4" />
+
+---
+
 Let me know if you want a diagram or to walk through the steps in the AWS console!
