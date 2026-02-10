@@ -100,7 +100,11 @@ If your organization plans to be **IPv6-ready**, design all new VPC subnets with
 
 ---
 
-Let me know if you’d like a **clear diagram** showing:
+
+<img width="426" height="351" alt="image" src="https://github.com/user-attachments/assets/6f06fd38-b55f-4140-91db-95164f4f0e62" />
+
+
+---
 
 * Public vs private subnet flow with IGW, NAT, and EOIGW
 * Or a **Terraform/CDK config example** using EOIGW.
